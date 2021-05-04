@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:pedantic/pedantic.dart';
 import 'package:shelf/shelf.dart';
@@ -22,10 +24,15 @@ Handler tunnelHandler() {
     modifyResponseHeaders(serverResponse.headers);
     print('sending headers to client: ${serverResponse.headers}');
 
+    var content = await serverResponse.stream
+        .transform(utf8.decoder)
+        .reduce((value, element) => value + element);
+    print('body is $content');
+
     /// Send the modified response to the client.
     return Response(
       serverResponse.statusCode,
-      body: serverResponse.stream,
+      body: content, //serverResponse.stream,
       headers: serverResponse.headers,
     );
   };
@@ -43,6 +50,21 @@ void modifyRequestHeaders(Map headers, Map parameters) {
 /// Add any headers required by the client.
 void modifyResponseHeaders(Map headers) {
   headers['access-control-allow-origin'] = '*';
+
+  /*headers.remove('connection');
+  headers.remove('content-length');
+  headers.remove('set-cookie');
+  headers.remove('ad-unit');
+  headers.remove('x-amz-cf-pop');
+  headers.remove('vary');
+  headers.remove('x-amz-cf-id');
+  headers.remove('x-amz-rid');
+  headers.remove('strict-transport-security');
+  headers.remove('content-security-policy');
+  headers.remove('Domain');
+  headers.remove('server');
+  headers.remove('via');*/
+  headers.remove('transfer-encoding');
 
   // If the client response was unzipped
   // the streamed body size will not be known to this lambda.
