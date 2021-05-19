@@ -5,5 +5,8 @@
 # Conventional directory for build outputs
 build/
 
+# Runtime network traffic
+trace/
+
 # Directory created by dartdoc
 doc/api/
